@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Route Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Emergency Route Finder</h1>
+        <p>Find the fastest route to nearby emergency services.</p>
+        <form method="post">
+            <label for="area">Area:</label>
+            <input type="text" id="area" name="area" required><br>
+
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required><br>
+
+            <label for="emergency_choice">Emergency Service:</label>
+            <select id="emergency_choice" name="emergency_choice" required>
+                <option value="hospital">Hospital</option>
+                <option value="fire_station">Fire Station</option>
+                <option value="police">Police</option>
+            </select><br>
+
+            <input type="submit" value="Find Emergency Route">
+        </form>
+    </div>
+</body>
+</html>

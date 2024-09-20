@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Routes Map</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJD3zGTWBY-_QwgCL3w0eKClNmo4gqnTg"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        function initMap() {
+            var start = {lat: {{ start_lat }}, lng: {{ start_lng }}};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: start
+            });
+
+            var directionsService = new google.maps.DirectionsService();
+            var directionsRenderers = [];
+
+            {% for i in range(3) %}
+                var rendererOptions = {
+                    map: map,
+                    suppressMarkers: false,
+                    preserveViewport: true,
+                    polylineOptions: {
+                        strokeColor: '{{ ["#FF0000", "#00FF00", "#0000FF"][i] }}',
+                        strokeOpacity: 0.7,
+                        strokeWeight: 5
+                    }
+                };
+                if (i == 0) {
+                    rendererOptions.polylineOptions.strokeWeight = 8;
+                    rendererOptions.polylineOptions.strokeOpacity = 1.0;
+                }
+                directionsRenderers.push(new google.maps.DirectionsRenderer(rendererOptions));
+            {% endfor %}
+
+            var waypointsList = {{ waypoints_list|tojson }};
+            console.log('Waypoints List:', waypointsList);  // Debugging line
+
+            var requests = [];
+            for (var i = 0; i < 3; i++) {
+                if (waypointsList[i] && waypointsList[i].length > 0) {
+                    var request = {
+                        origin: start,
+                        destination: waypointsList[i][waypointsList[i].length - 1].location,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        waypoints: waypointsList[i],
+                        optimizeWaypoints: true
+                    };
+                    requests.push(request);
+                }
+            }
+
+            console.log('Requests:', requests);  // Debugging line
+
+            for (var i = 0; i < requests.length; i++) {
+                directionsService.route(requests[i], (function(renderer, i) {
+                    return function(result, status) {
+                        if (status === google.maps.DirectionsStatus.OK) {
+                            renderer.setDirections(result);
+                        } else {
+                            console.error('Directions request failed due to ' + status);  // Debugging line
+                        }
+                    };
+                })(directionsRenderers[i], i));
+            }
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
